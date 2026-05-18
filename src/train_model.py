@@ -50,12 +50,17 @@ def run_modeling_pipeline():
     X_train_scaled, X_test_scaled, y_train, y_test, feature_names = load_and_split_data()
 
     # 2. Model Blueprint Parameters Setup
+    # models = {
+    #     'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000),
+    #     'Random Forest': RandomForestClassifier(random_state=42, n_estimators=100, n_jobs=-1),
+    #     'XGBoost': XGBClassifier(random_state=42, n_estimators=100, eval_metric='logloss')
+    # }
+    # 2. Model Blueprint Parameters Setup WITH Class Imbalance Adjustments
     models = {
-        'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000),
-        'Random Forest': RandomForestClassifier(random_state=42, n_estimators=100, n_jobs=-1),
-        'XGBoost': XGBClassifier(random_state=42, n_estimators=100, eval_metric='logloss')
+        'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000, class_weight='balanced'),
+        'Random Forest': RandomForestClassifier(random_state=42, n_estimators=100, n_jobs=-1, class_weight='balanced'),
+        'XGBoost': XGBClassifier(random_state=42, n_estimators=100, eval_metric='logloss', scale_pos_weight=4)
     }
-
     results = {}
 
     # 3. Training & Iterative Diagnostic Testing Engine
@@ -81,9 +86,10 @@ def run_modeling_pipeline():
         cm = confusion_matrix(y_test, y_pred)
         print(f"Confusion Matrix:\n{cm}")
 
+        # print(f"\nClassification Report:")
+        # print(classification_report(y_test, y_pred, target_names=['Not Churned', 'Churned']))
         print(f"\nClassification Report:")
-        print(classification_report(y_test, y_pred, target_names=['Not Churned', 'Churned']))
-
+        print(classification_report(y_test, y_pred, target_names=['Not Churned', 'Churned'], zero_division=0))
         roc_auc = roc_auc_score(y_test, y_pred_proba)
         pr_auc = average_precision_score(y_test, y_pred_proba)
         print(f"ROC-AUC Score: {roc_auc:.4f} | Precision-Recall AUC: {pr_auc:.4f}")
