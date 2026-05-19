@@ -129,6 +129,14 @@ class ChurnDataPipeline:
         print("Transforming and aligning data splits...")
         X_train_transformed = pipeline_model.fit_transform(train_df)
         X_test_transformed = pipeline_model.transform(test_df)
+   
+
+	# === ADD THIS BLOCK TO SAVE YOUR PREPROCESSOR ===
+        import joblib
+        models_dir = "models"
+        os.makedirs(models_dir, exist_ok=True)
+        joblib.dump(pipeline_model, os.path.join(models_dir, "preprocessor_pipeline.pkl"))
+        print("✓ Preprocessing pipeline architecture saved to 'models/preprocessor_pipeline.pkl'")
 
         # Dynamically map and rebuild exact column name arrays for tracking transparency
         cat_encoder = pipeline_model.named_steps['preprocessor'].named_transformers_['cat'].named_steps['onehot']

@@ -49,12 +49,6 @@ def run_modeling_pipeline():
     # 1. Pipeline Input Phase
     X_train_scaled, X_test_scaled, y_train, y_test, feature_names = load_and_split_data()
 
-    # 2. Model Blueprint Parameters Setup
-    # models = {
-    #     'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000),
-    #     'Random Forest': RandomForestClassifier(random_state=42, n_estimators=100, n_jobs=-1),
-    #     'XGBoost': XGBClassifier(random_state=42, n_estimators=100, eval_metric='logloss')
-    # }
     # 2. Model Blueprint Parameters Setup WITH Class Imbalance Adjustments
     models = {
         'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000, class_weight='balanced'),
@@ -86,8 +80,6 @@ def run_modeling_pipeline():
         cm = confusion_matrix(y_test, y_pred)
         print(f"Confusion Matrix:\n{cm}")
 
-        # print(f"\nClassification Report:")
-        # print(classification_report(y_test, y_pred, target_names=['Not Churned', 'Churned']))
         print(f"\nClassification Report:")
         print(classification_report(y_test, y_pred, target_names=['Not Churned', 'Churned'], zero_division=0))
         roc_auc = roc_auc_score(y_test, y_pred_proba)
@@ -187,7 +179,25 @@ def run_modeling_pipeline():
 
     print(comparison_df.round(4))
     print(f"\n🥇 Operational Standard Recommendation via ROC-AUC: {comparison_df['ROC-AUC'].idxmax()}")
+    # Identify the best model based on your metric choice (e.g., PR-AUC or ROC-AUC)
+    best_model_name = comparison_df['PR-AUC'].idxmax()
+    print(f"\n🥇 Best model identified by PR-AUC: {best_model_name}")
+    # === ADD THIS BLOCK TO SAVE YOUR TRAINED ML MODELS ===
+    import joblib
+    models_dir = "models"
+    os.makedirs(models_dir, exist_ok=True)
 
+    # Option A: Save ALL models just in case
+    for model_name, data in results.items():
+        clean_name = model_name.lower().replace(" ", "_")
+        filename = os.path.join(models_dir, f"{clean_name}_model.pkl")
+        joblib.dump(data['model'], filename)
+        print(f"✓ Saved {model_name} weights to '{filename}'")
+
+    # Option B: Explicitly tag and save the best overall champion model
+    best_model_filename = os.path.join(models_dir, "best_churn_model.pkl")
+    joblib.dump(results[best_model_name]['model'], best_model_filename)
+    print(f"🔥 Champion Model ({best_model_name}) successfully exported to '{best_model_filename}'")
     # 8. Structural Feature Importance Profiling Engine
     print("\n" + "=" * 70)
     print("              TREE-BASED FEATURE IMPORTANCE METRICS")
