@@ -4,14 +4,12 @@ Style Archetype: React.js Glassmorphic / Fintech Premium Dark Theme
 Author: Advanced AI Systems Team
 """
 
-import os
 import sys
 from pathlib import Path
-import joblib
 import pandas as pd
-import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
+import requests
 
 # --- 1. APP CONFIGURATION & REACT AMBIENCE ---
 st.set_page_config(
@@ -21,10 +19,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Premium React-Style CSS Injection Framework (Tailwind & Glassmorphic Variables)
+# Define network routing boundary to the backend Docker service
+API_URL = "http://backend:8000/predict"
+
+# Premium React-Style CSS Injection Framework
 st.markdown("""
     <style>
-        /* Global App Overrides */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;600;800&display=swap');
 
         html, body, [data-testid="stAppViewContainer"] {
@@ -32,7 +32,6 @@ st.markdown("""
             background-color: #0b0f19 !important;
         }
 
-        /* Modern React-style Content Cards */
         .react-card {
             background: rgba(30, 41, 59, 0.4);
             backdrop-filter: blur(12px);
@@ -49,7 +48,6 @@ st.markdown("""
             box-shadow: 0 12px 40px 0 rgba(59, 130, 246, 0.1);
         }
 
-        /* Typography System */
         .react-hero-title {
             font-size: 3rem;
             font-weight: 800;
@@ -67,7 +65,6 @@ st.markdown("""
             margin-bottom: 30px;
         }
 
-        /* Interactive Component Elements */
         .action-header {
             font-weight: 600;
             color: #f1f5f9;
@@ -92,56 +89,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. MULTI-LEVEL RESOLUTION SYSTEM ---
-API_DIR = Path(__file__).resolve().parent
-BASE_DIR = API_DIR.parent
-
-if str(BASE_DIR) not in sys.path:
-    sys.path.append(str(BASE_DIR))
-
-# Secondary hook for workspace flexibility
-SRC_DIR = BASE_DIR / "src"
-if SRC_DIR.exists() and str(SRC_DIR) not in sys.path:
-    sys.path.append(str(SRC_DIR))
-
-try:
-    from data_pipeline import DemographicsInteracter
-
-    # === CRITICAL WORKAROUND FOR STREAMLIT + JOBLIB NAMESPACE ===
-    import __main__
-
-    setattr(__main__, 'DemographicsInteracter', DemographicsInteracter)
-    # ============================================================
-
-except ImportError:
-    st.error("❌ Critical Link Failure: 'data_pipeline.py' missing from system core path.")
-    st.stop()
-
-
-# --- 3. LOAD PIPELINE ASSETS ---
-@st.cache_resource
-def load_ml_assets():
-    pipeline_path = BASE_DIR / "models" / "preprocessor_pipeline.pkl"
-    model_path = BASE_DIR / "models" / "best_churn_model.pkl"
-
-    if not pipeline_path.exists() or not model_path.exists():
-        return None, None
-
-    return joblib.load(pipeline_path), joblib.load(model_path)
-
-
-pipeline, model = load_ml_assets()
-
-if pipeline is None or model is None:
-    st.error("⚠️ Local Pipeline Artifact Objects Missing! Execute training sequences first.")
-    st.stop()
-
-# --- 4. FINTECH HERO DISPLAY SECTION ---
+# --- 2. FINTECH HERO DISPLAY SECTION ---
 st.markdown('<h1 class="react-hero-title">RiskHorizon™ Intelligence OS</h1>', unsafe_allow_html=True)
 st.markdown('<p class="react-hero-sub">Next-Gen Predictive Customer Attrition Engine • Active Environment v3.1.4</p>',
             unsafe_allow_html=True)
 
-# --- 5. HIGH-FIDELITY LAYOUT FORM COMPONENT ---
+# --- 3. HIGH-FIDELITY LAYOUT FORM COMPONENT ---
 with st.container():
     st.markdown('<div class="react-card">', unsafe_allow_html=True)
     st.markdown(
@@ -155,7 +108,7 @@ with st.container():
         st.markdown(
             "<p style='color:#94a3b8; font-size:0.85rem; margin-bottom:5px; font-weight:600;'>ACCOUNT HOLDER</p>",
             unsafe_allow_html=True)
-        age = st.number_input("Age Profile", min_value=18, max_value=95, value=42, label_visibility="collapsed")
+        age = st.number_input("Age Profile", min_value=18, max_value=95, value=42)
         gender = st.selectbox("Gender", ["Male", "Female"])
         marital_status = st.selectbox("Marital Layout", ["Single", "Married", "Divorced"])
 
@@ -172,118 +125,140 @@ with st.container():
         st.markdown(
             "<p style='color:#94a3b8; font-size:0.85rem; margin-bottom:5px; font-weight:600;'>ENGAGEMENT METRICS</p>",
             unsafe_allow_html=True)
-        tenure = st.slider("Tenure Months", min_value=1, max_value=72, value=36, label_visibility="collapsed")
-        interaction_type = st.radio("Primary Touchpoint", ["Call Center", "Web Chat", "Email"], horizontal=True)
+        st.markdown("<p style='color:#f1f5f9; font-size:0.85rem; margin-top:10px;'>Tenure Months</p>",
+                    unsafe_allow_html=True)
+        tenure = st.slider("Tenure Months Slider", min_value=1, max_value=72, value=36, label_visibility="collapsed")
+        st.markdown("<p style='color:#f1f5f9; font-size:0.85rem; margin-top:15px;'>Primary Touchpoint</p>",
+                    unsafe_allow_html=True)
+        interaction_type = st.radio("Primary Touchpoint Radio", ["Call Center", "Web Chat", "Email"], horizontal=True,
+                                    label_visibility="collapsed")
 
     with c4:
         st.markdown(
             "<p style='color:#94a3b8; font-size:0.85rem; margin-bottom:5px; font-weight:600;'>SUPPORT MATRIX</p>",
             unsafe_allow_html=True)
-        resolution_status = st.selectbox("Ticket Status", ["Resolved", "Unresolved", "Escalated"],
+        st.markdown("<p style='color:#f1f5f9; font-size:0.85rem;'>Ticket Status</p>", unsafe_allow_html=True)
+        resolution_status = st.selectbox("Ticket Status Box", ["Resolved", "Unresolved", "Escalated"],
                                          label_visibility="collapsed")
 
-    st.markdown("<br>", unsafe_allow_html=True)  # <<--- FIXED LINE 177 TYPO HERE
-    predict_button = st.button("⚡ Run Real-Time In-Memory Prediction", type="primary", use_container_width=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+    predict_button = st.button("⚡ Run Real-Time Cloud API Prediction", type="primary", use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 6. REACT-INSPIRED DYNAMIC PREDICTION VIEW PANEL ---
+# --- 4. DECOUPLED NETWORK INFERENCE LOGIC ---
 if predict_button:
-    # Compile the telemetry vector
-    raw_input_df = pd.DataFrame({
-        'Age': [age], 'Tenure': [tenure], 'MonthlyCharges': [monthly_charges], 'TotalCharges': [total_charges],
-        'Gender': [gender], 'MaritalStatus': [marital_status], 'ResolutionStatus': [resolution_status],
-        'InteractionType': [interaction_type], 'IncomeLevel': [income_level]
-    })
+    # Build clean payload mapped exactly to FastAPI's incoming telemetry validation expectations
+    payload = {
+        "Age": int(age),
+        "Tenure": int(tenure),
+        "MonthlyCharges": float(monthly_charges),
+        "TotalCharges": float(total_charges),
+        "Gender": str(gender),
+        "MaritalStatus": str(marital_status),
+        "ResolutionStatus": str(resolution_status),
+        "InteractionType": str(interaction_type),
+        "IncomeLevel": str(income_level)
+    }
 
-    # Process through pipeline engine
-    with st.spinner(""):
-        processed_vector = pipeline.transform(raw_input_df)
-        risk_probability = model.predict_proba(processed_vector)[0, 1]
+    with st.spinner("Communicating with RiskHorizon™ Cloud Engine..."):
+        try:
+            response = requests.post(API_URL, json=payload, timeout=10)
 
-    # Establish visual design tokens dynamically
-    if risk_probability > 0.50:
-        status_color, accent_glow, verdict_text = "#ef4444", "rgba(239, 68, 68, 0.15)", "CRITICAL RISK PROFILE"
-        task_bracket = "high"
-    elif risk_probability > 0.20:
-        status_color, accent_glow, verdict_text = "#fbbf24", "rgba(251, 191, 36, 0.15)", "ELEVATED RISK WARN"
-        task_bracket = "medium"
-    else:
-        status_color, accent_glow, verdict_text = "#10b981", "rgba(16, 185, 129, 0.15)", "STABLE / HIGH RETENTION"
-        task_bracket = "low"
+            if response.status_code == 200:
+                result = response.json()
 
-    # Layout Output Splitting: 2-Column Dashboard Layout
-    out_left, out_right = st.columns([1.1, 1.4])
+                risk_probability = result["churn_probability"]
+                verdict_text = result["risk_verdict"]
+                task_bracket = result["action_bracket"]
 
-    with out_left:
-        st.markdown(f"""
-            <div class="react-card" style="border: 1px solid {status_color}33; background: {accent_glow}; text-align: center;">
-                <p style="margin:0; color:#94a3b8; font-size:0.85rem; font-weight:600; letter-spacing:0.05em;">SYSTEM VERDICT STATUS</p>
-                <h2 style="margin:5px 0 15px 0; color:{status_color}; font-weight:800; font-size:1.6rem; letter-spacing:-0.02em;">{verdict_text}</h2>
-                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:15px 0;">
-                <p style="margin:0; color:#64748b; font-size:0.8rem;">MODEL CONFIDENCE SCORE</p>
-                <h1 style="margin:0; color:#ffffff; font-size:3.5rem; font-weight:800;">{risk_probability:.1%}</h1>
-            </div>
-        """, unsafe_allow_html=True)
+                # Assign status colors based on the microservice's processed verdict tier
+                if task_bracket == "high":
+                    status_color, accent_glow = "#ef4444", "rgba(239, 68, 68, 0.15)"
+                elif task_bracket == "medium":
+                    status_color, accent_glow = "#fbbf24", "rgba(251, 191, 36, 0.15)"
+                else:
+                    status_color, accent_glow = "#10b981", "rgba(16, 185, 129, 0.15)"
 
-        # Micro financial utility tracking widgets
-        retention_value = 500
-        intervention_cost = 50
-        net_expected_utility = (retention_value * (1 - risk_probability)) - intervention_cost
+                # --- 5. INTERACTIVE VIEW RENDERING PANEL ---
+                out_left, out_right = st.columns([1.1, 1.4])
 
-        f_col1, f_col2 = st.columns(2)
-        with f_col1:
-            st.metric("Intervention Cost", f"${intervention_cost}.00")
-        with f_col2:
-            st.metric("Net Predicted Yield", f"${net_expected_utility:,.2f}")
+                with out_left:
+                    st.markdown(f"""
+                        <div class="react-card" style="border: 1px solid {status_color}33; background: {accent_glow}; text-align: center;">
+                            <p style="margin:0; color:#94a3b8; font-size:0.85rem; font-weight:600; letter-spacing:0.05em;">SYSTEM VERDICT STATUS</p>
+                            <h2 style="margin:5px 0 15px 0; color:{status_color}; font-weight:800; font-size:1.6rem; letter-spacing:-0.02em;">{verdict_text}</h2>
+                            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.08); margin:15px 0;">
+                            <p style="margin:0; color:#64748b; font-size:0.8rem;">MODEL CONFIDENCE SCORE</p>
+                            <h1 style="margin:0; color:#ffffff; font-size:3.5rem; font-weight:800;">{risk_probability:.1%}</h1>
+                        </div>
+                    """, unsafe_allow_html=True)
 
-    with out_right:
-        # High-Fidelity Modern Linear Progress Bar Component
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=[risk_probability * 100], y=['Risk'],
-            orientation='h', width=0.4,
-            marker=dict(color=status_color, line=dict(color='rgba(0,0,0,0)', width=0)),
-            hoverinfo='none'
-        ))
-        fig.update_layout(
-            xaxis=dict(range=[0, 100], showgrid=False, zeroline=False, color='#475569'),
-            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(15, 23, 42, 0.6)',
-            margin=dict(l=0, r=0, t=10, b=10), height=70, showlegend=False
-        )
+                    # Valuation utility calculations
+                    retention_value = 500
+                    intervention_cost = 50
+                    net_expected_utility = (retention_value * (1 - risk_probability)) - intervention_cost
 
-        st.markdown('<div class="react-card">', unsafe_allow_html=True)
-        st.markdown(
-            "<p style='color:#94a3b8; font-size:0.85rem; font-weight:600; margin:0 0 5px 0;'>RISK SPECTRUM POSITIONING</p>",
-            unsafe_allow_html=True)
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+                    f_col1, f_col2 = st.columns(2)
+                    with f_col1:
+                        st.metric("Intervention Cost", f"${intervention_cost}.00")
+                    with f_col2:
+                        st.metric("Net Predicted Yield", f"${net_expected_utility:,.2f}")
 
-        # Actionable CRM Next-Best-Action Task List Block
-        st.markdown(f'<div class="action-header">⚡ CRM Actionable Next-Best-Steps Panel</div>', unsafe_allow_html=True)
+                with out_right:
+                    # Render Horizonal Spectrum Chart Element
+                    fig = go.Figure()
+                    fig.add_trace(go.Bar(
+                        x=[risk_probability * 100], y=['Risk'],
+                        orientation='h', width=0.4,
+                        marker=dict(color=status_color, line=dict(color='rgba(0,0,0,0)', width=0)),
+                        hoverinfo='none'
+                    ))
+                    fig.update_layout(
+                        xaxis=dict(range=[0, 100], showgrid=False, zeroline=False, color='#475569'),
+                        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(15, 23, 42, 0.6)',
+                        margin=dict(l=0, r=0, t=10, b=10), height=70, showlegend=False
+                    )
 
-        if task_bracket == "high":
-            st.markdown(
-                f'<div class="task-item high">🚨 <b>Priority 1:</b> Route immediately to senior accounts resolution squad.</div>',
-                unsafe_allow_html=True)
-            st.markdown(
-                f'<div class="task-item high">💸 <b>Priority 2:</b> Flag account for a high-value retention fee reduction credit.</div>',
-                unsafe_allow_html=True)
-            st.markdown(
-                f'<div class="task-item high">📞 <b>Priority 3:</b> Bypass automated emails; schedule a high-touch outbound account review.</div>',
-                unsafe_allow_html=True)
-        elif task_bracket == "medium":
-            st.markdown(
-                f'<div class="task-item medium">⚠️ <b>Priority 1:</b> Deploy customized email retention incentives based on user channel usage.</div>',
-                unsafe_allow_html=True)
-            st.markdown(
-                f'<div class="task-item medium">🔄 <b>Priority 2:</b> Re-verify open ticket logs via the {interaction_type} pipeline queue.</div>',
-                unsafe_allow_html=True)
-        else:
-            st.markdown(
-                f'<div class="task-item low">✅ <b>Routine:</b> Group account into standard monthly loyalty engagement workflows.</div>',
-                unsafe_allow_html=True)
-            st.markdown(
-                f'<div class="task-item low">📈 <b>Routine:</b> Account stable; cross-sell additional system features if applicable.</div>',
-                unsafe_allow_html=True)
+                    st.markdown('<div class="react-card">', unsafe_allow_html=True)
+                    st.markdown(
+                        "<p style='color:#94a3b8; font-size:0.85rem; font-weight:600; margin:0 0 5px 0;'>RISK SPECTRUM POSITIONING</p>",
+                        unsafe_allow_html=True)
+                    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-        st.markdown('</div>', unsafe_allow_html=True)
+                    # CRM Playbook Action Items Panel
+                    st.markdown('<div class="action-header">⚡ CRM Actionable Next-Best-Steps Panel</div>',
+                                unsafe_allow_html=True)
+
+                    if task_bracket == "high":
+                        st.markdown(
+                            f'<div class="task-item high">🚨 <b>Priority 1:</b> Route immediately to senior accounts resolution squad.</div>',
+                            unsafe_allow_html=True)
+                        st.markdown(
+                            f'<div class="task-item high">💸 <b>Priority 2:</b> Flag account for a high-value retention fee reduction credit.</div>',
+                            unsafe_allow_html=True)
+                        st.markdown(
+                            f'<div class="task-item high">📞 <b>Priority 3:</b> Bypass automated emails; schedule a high-touch outbound account review.</div>',
+                            unsafe_allow_html=True)
+                    elif task_bracket == "medium":
+                        st.markdown(
+                            f'<div class="task-item medium">⚠️ <b>Priority 1:</b> Deploy customized email retention incentives based on user channel usage.</div>',
+                            unsafe_allow_html=True)
+                        st.markdown(
+                            f'<div class="task-item medium">🔄 <b>Priority 2:</b> Re-verify open ticket logs via the {interaction_type} pipeline queue.</div>',
+                            unsafe_allow_html=True)
+                    else:
+                        st.markdown(
+                            f'<div class="task-item low">✅ <b>Routine:</b> Group account into standard monthly loyalty engagement workflows.</div>',
+                            unsafe_allow_html=True)
+                        st.markdown(
+                            f'<div class="task-item low">📈 <b>Routine:</b> Account stable; cross-sell additional system features if applicable.</div>',
+                            unsafe_allow_html=True)
+
+                    st.markdown('</div>', unsafe_allow_html=True)
+            else:
+                st.error(f"Backend Engine Error (Status Code: {response.status_code})")
+
+        except requests.exceptions.ConnectionError:
+            st.error(
+                "🚨 Unable to connect to the Inference Engine API. Check if the backend Docker container is running.")

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # --- SERVICE 1: THE FASTAPI BACKEND INFERENCE ENGINE ---
+  backend:
+    build: .
+    container_name: churn_backend_api
+    command: python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - ENV=production
+
+  # --- SERVICE 2: THE GLASSMORPHIC STREAMLIT FRONTEND ---
+  frontend:
+    build: .
+    container_name: churn_streamlit_gui
+    # Run streamlit as a python module explicitly pointing to your script path
+    command: python -m streamlit run api/app.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    depends_on:
+      - backend
