@@ -114,7 +114,6 @@ DevOps Foundation: Environment container configuration (Dockerfile), network abs
 
 
 here is screenshot of GUI
-![img.png](img.png)
-![img_1.png](img_1.png)
+<img width="1221" height="493" alt="image" src="https://github.com/user-attachments/assets/d5d73757-f5bf-4d3c-9a20-22eda5c9ef41" />
 
               
