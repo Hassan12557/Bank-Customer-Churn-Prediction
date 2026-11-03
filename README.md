@@ -37,6 +37,8 @@ The system is engineered as a decoupled microservices architecture, isolating th
 * **Fault-Tolerant Asset Loading:** Features a robust model-loading system with automatic dummy fallbacks to ensure zero-downtime execution environments.
 * **Dynamic Risk Brackets:** Automates CRM decision-making by segmenting customer profiles into `CRITICAL RISK PROFILE`, `ELEVATED RISK WARN`, or `STABLE` tiers.
 * **Actionable Business Logic:** Calculates direct cost-benefit financial metrics on the fly, yielding estimated net operational values for customer interventions.
+* here is screenshot of GUI
+<img width="1221" height="493" alt="image" src="https://github.com/user-attachments/assets/d5d73757-f5bf-4d3c-9a20-22eda5c9ef41" />
 
 ---
 
@@ -113,7 +115,6 @@ Frontend Design: Custom CSS component styling injections, state-driven widget da
 DevOps Foundation: Environment container configuration (Dockerfile), network abstraction mapping, and process isolation setup.
 
 
-here is screenshot of GUI
-<img width="1221" height="493" alt="image" src="https://github.com/user-attachments/assets/d5d73757-f5bf-4d3c-9a20-22eda5c9ef41" />
+
 
               
